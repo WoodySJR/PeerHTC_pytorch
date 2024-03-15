@@ -7,6 +7,8 @@ warnings.filterwarnings("ignore")
 from sklearn.metrics import f1_score, accuracy_score
 from tqdm import tqdm
 
+num_1, num_2, num_3, num_labels = 7,46,77,130
+
 # training function (including early stopping)
 def train(model, train_dataloader, val_dataloader, num_epochs, lr, budget, save_path, thr):
     optimizer = AdamW(model.parameters(), lr=lr, weight_decay=0.0000001)
@@ -49,16 +51,16 @@ def train(model, train_dataloader, val_dataloader, num_epochs, lr, budget, save_
                         targets = torch.cat((targets,labels), dim=0)
                 micro_f1 = f1_score(targets.cpu(), preds.cpu(), average="micro")
                 macro_f1 = f1_score(targets.cpu(), preds.cpu(), average="macro")
-                micro_f11 = f1_score(targets[:,0:20].cpu(), preds[:,0:20].cpu(), average="micro")
-                macro_f11 = f1_score(targets[:,0:20].cpu(), preds[:,0:20].cpu(), average="macro")
-                micro_f12 = f1_score(targets[:,20:100].cpu(), preds[:,20:100].cpu(), average="micro")
-                macro_f12 = f1_score(targets[:,20:100].cpu(), preds[:,20:100].cpu(), average="macro")
-                micro_f13 = f1_score(targets[:,100:225].cpu(), preds[:,100:225].cpu(), average="micro")
-                macro_f13 = f1_score(targets[:,100:225].cpu(), preds[:,100:225].cpu(), average="macro")
+                micro_f11 = f1_score(targets[:,0:num_1].cpu(), preds[:,0:num_1].cpu(), average="micro")
+                macro_f11 = f1_score(targets[:,0:num_1].cpu(), preds[:,0:num_1].cpu(), average="macro")
+                micro_f12 = f1_score(targets[:,num_1:(num_1+num_2)].cpu(), preds[:,num_1:(num_1+num_2)].cpu(), average="micro")
+                macro_f12 = f1_score(targets[:,num_1:(num_1+num_2)].cpu(), preds[:,num_1:(num_1+num_2)].cpu(), average="macro")
+                micro_f13 = f1_score(targets[:,(num_1+num_2):num_labels].cpu(), preds[:,(num_1+num_2):num_labels].cpu(), average="micro")
+                macro_f13 = f1_score(targets[:,(num_1+num_2):num_labels].cpu(), preds[:,(num_1+num_2):num_labels].cpu(), average="macro")
                 acc = torch.sum(torch.all(preds==targets, dim=1))/targets.shape[0]
-                acc1 = torch.sum(torch.all(preds[:,0:20]==targets[:,0:20], dim=1))/targets.shape[0]
-                acc2 = torch.sum(torch.all(preds[:,20:100]==targets[:,20:100], dim=1))/targets.shape[0]
-                acc3 = torch.sum(torch.all(preds[:,100:225]==targets[:,100:225], dim=1))/targets.shape[0]
+                acc1 = torch.sum(torch.all(preds[:,0:num_1]==targets[:,0:num_1], dim=1))/targets.shape[0]
+                acc2 = torch.sum(torch.all(preds[:,num_1:(num_1+num_2)]==targets[:,num_1:(num_1+num_2)], dim=1))/targets.shape[0]
+                acc3 = torch.sum(torch.all(preds[:,(num_1+num_2):num_labels]==targets[:,(num_1+num_2):num_labels], dim=1))/targets.shape[0]
                 print("Epoch %d overall: Micro-F1 %.4f, Macro-F1 %.4f, Accuracy %.4f"%(e,micro_f1,macro_f1,acc))
                 print("Epoch %d level 1: Micro-F1 %.4f, Macro-F1 %.4f, Accuracy %.4f"%(e,micro_f11,macro_f11,acc1))
                 print("Epoch %d level 2: Micro-F1 %.4f, Macro-F1 %.4f, Accuracy %.4f"%(e,micro_f12,macro_f12,acc2))
